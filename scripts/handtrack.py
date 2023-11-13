@@ -17,6 +17,7 @@ class handDetcetor():
     def findHands(self, frame, draw= True):
         imgRGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
+        #self.results = self.hands.process(frame)
         #print(results.multi_hand_landmarks)
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks: 
@@ -49,13 +50,29 @@ def main():
         ret, frame = cap.read()
         frame = detector.findHands(frame)
         lmList = detector.findPosition(frame)
+        action = []
         if len(lmList) != 0:
-            if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2]):
+            # Gesto 1
+            if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2]  and lmList[4][2] > lmList[8][2]):
                 if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
-                    print("pointing up")
+                    action.append("pointing up")
                 if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
-                    print("pointing up")
+                    action.append("pointing up")
+            # Gesto 2
+            if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2] and lmList[4][2] > lmList[8][2]):
+                if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
+                    action.append("faz o L")
+                if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
+                    action.append("faz o L")
+            # Gesto 3
+            if((lmList[12][2] < lmList[8][2] and lmList[16][2] < lmList[8][2] and lmList[12][2] < lmList[8][2]) and lmList[0][2] < lmList[8][2] and lmList[8][2] > lmList[6][2] and lmList[8][2] > lmList[7][2] and lmList[4][2] < lmList[8][2]):
+                if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
+                    action.append("pointing down")
+                if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
+                    action.append("pointing down")
 
+        if len(action) != 0:
+            cv.putText(frame, action[0], (100,170), cv.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
         #FPS
         cTime = time.time()
         fps = 1/(cTime-pTime)
