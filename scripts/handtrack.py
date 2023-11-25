@@ -41,8 +41,24 @@ class handDetcetor():
 
             return lmList
 
+def pointing_up(lmList):
+    if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2]  and lmList[4][2] > lmList[8][2]):
+        if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
+            return True
+        if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
+            return True
+        
+def pointing_down(lmList):
+    if((lmList[12][2] < lmList[8][2] and lmList[16][2] < lmList[8][2] and lmList[12][2] < lmList[8][2]) and lmList[0][2] < lmList[8][2] and lmList[8][2] > lmList[6][2] and lmList[8][2] > lmList[7][2] and lmList[4][2] < lmList[8][2]):
+        if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
+            return True
+        if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
+            return True
+
 def main():
     cap = cv.VideoCapture(0)
+    cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
     pTime = 0
     cTime = 0
     detector = handDetcetor()
@@ -53,26 +69,15 @@ def main():
         action = []
         if len(lmList) != 0:
             # Gesto 1
-            if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2]  and lmList[4][2] > lmList[8][2]):
-                if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
-                    action.append("pointing up")
-                if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
-                    action.append("pointing up")
+            if(pointing_up(lmList)):
+                action.append("pointing up")
             # Gesto 2
-            if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2] and lmList[4][2] > lmList[8][2]):
-                if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
-                    action.append("faz o L")
-                if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
-                    action.append("faz o L")
-            # Gesto 3
-            if((lmList[12][2] < lmList[8][2] and lmList[16][2] < lmList[8][2] and lmList[12][2] < lmList[8][2]) and lmList[0][2] < lmList[8][2] and lmList[8][2] > lmList[6][2] and lmList[8][2] > lmList[7][2] and lmList[4][2] < lmList[8][2]):
-                if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
-                    action.append("pointing down")
-                if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
-                    action.append("pointing down")
+            if(pointing_down(lmList)):
+                action.append("pointing down")
 
         if len(action) != 0:
             cv.putText(frame, action[0], (100,170), cv.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
+            
         #FPS
         cTime = time.time()
         fps = 1/(cTime-pTime)
