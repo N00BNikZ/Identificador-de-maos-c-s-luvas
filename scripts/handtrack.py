@@ -3,7 +3,7 @@ import time
 import mediapipe as mp
 
 class handDetcetor():
-    def __init__(self, mode = False, maxHands = 2, complexity = 1, detectionCon = 0.5, trackCon = 0.5 ):
+    def __init__(self, mode = False, maxHands = 2, complexity = 1, detectionCon = 0.75, trackCon = 0.75 ):
         self.mode = mode
         self.maxHands = maxHands
         self.complexity = complexity
@@ -15,8 +15,9 @@ class handDetcetor():
         self.mpDraw = mp.solutions.drawing_utils
 
     def findHands(self, frame, draw= True):
-        #imgRGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-        self.results = self.hands.process(frame)
+        imgRGB = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        self.results = self.hands.process(imgRGB)
+        #self.results = self.hands.process(frame)
         #print(results.multi_hand_landmarks)
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks: 
@@ -36,12 +37,28 @@ class handDetcetor():
                     #print(id, cx, cy)
                     lmList.append([id, cx, cy])
                     if draw :
-                        cv.circle(frame, (cx, cy), 5, (255,0,255), cv.FILLED)
+                        cv.circle(frame, (cx, cy), 3, (255,0,255), cv.FILLED)
 
             return lmList
 
+def pointing_up(lmList):
+    if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2]  and lmList[4][2] > lmList[8][2]):
+        if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
+            return True
+        if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
+            return True
+        
+def pointing_down(lmList):
+    if((lmList[12][2] < lmList[8][2] and lmList[16][2] < lmList[8][2] and lmList[12][2] < lmList[8][2]) and lmList[0][2] < lmList[8][2] and lmList[8][2] > lmList[6][2] and lmList[8][2] > lmList[7][2] and lmList[4][2] < lmList[8][2]):
+        if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
+            return True
+        if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
+            return True
+
 def main():
     cap = cv.VideoCapture(0)
+    cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
     pTime = 0
     cTime = 0
     detector = handDetcetor()
@@ -49,14 +66,23 @@ def main():
         ret, frame = cap.read()
         frame = detector.findHands(frame)
         lmList = detector.findPosition(frame)
+        action = []
         if len(lmList) != 0:
-            print(lmList[0])
+            # Gesto 1
+            if(pointing_up(lmList)):
+                action.append("pointing up")
+            # Gesto 2
+            if(pointing_down(lmList)):
+                action.append("pointing down")
 
+        if len(action) != 0:
+            cv.putText(frame, action[0], (100,170), cv.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
+            
         #FPS
         cTime = time.time()
         fps = 1/(cTime-pTime)
         pTime = cTime
-        cv.putText(frame,str(int(fps)),(10,70), cv.FONT_HERSHEY_PLAIN, 3, (255,0,255),3)
+        cv.putText(frame, str(int(fps)), (10,70), cv.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
 
         cv.imshow('Imagem', frame)
         if cv.waitKey(1) == 27:
