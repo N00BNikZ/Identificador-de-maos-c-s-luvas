@@ -39,21 +39,46 @@ class handDetcetor():
                     if draw :
                         cv.circle(frame, (cx, cy), 3, (255,0,255), cv.FILLED)
 
+                if len(self.results.multi_hand_landmarks) == 2:
+                    myHand2 = self.results.multi_hand_landmarks[handNo+1]
+                    for id, lm in enumerate(myHand2.landmark):
+                        #print(id, lm)
+                        h, w, c= frame.shape
+                        cx, cy= int(lm.x*w), int(lm.y*h)
+                        #print(id, cx, cy)
+                        lmList.append([id, cx, cy])
+                        if draw :
+                            cv.circle(frame, (cx, cy), 3, (255,0,255), cv.FILLED)
+
             return lmList
 
-def pointing_up(lmList):
+def pointing_up(lmList, action):
     if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2]  and lmList[4][2] > lmList[8][2]):
         if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
-            return True
+            action.append("pointing up")
         if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
-            return True
+            action.append("pointing up")
+    
+    elif len(lmList) > 21:
+        if((lmList[12+21][2] > lmList[8+21][2] and lmList[16+21][2] > lmList[8+21][2] and lmList[12+21][2] > lmList[8+21][2]) and lmList[0+21][2] > lmList[8+21][2] and lmList[8+21][2] < lmList[6+21][2] and lmList[8+21][2] < lmList[7+21][2]  and lmList[4+21][2] > lmList[8+21][2]):
+            if((lmList[8+21][1] > lmList[20+21][1]) and (lmList[6+21][1] > lmList[4+21][1])):
+                action.append("pointing up")
+            if((lmList[8+21][1] < lmList[20+21][1]) and (lmList[6+21][1] < lmList[4+21][1])):
+                action.append("pointing up")
         
-def pointing_down(lmList):
+def pointing_down(lmList, action):
     if((lmList[12][2] < lmList[8][2] and lmList[16][2] < lmList[8][2] and lmList[12][2] < lmList[8][2]) and lmList[0][2] < lmList[8][2] and lmList[8][2] > lmList[6][2] and lmList[8][2] > lmList[7][2] and lmList[4][2] < lmList[8][2]):
         if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
-            return True
+            action.append("pointing down")
         if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
-            return True
+            action.append("pointing down")    
+
+    elif len(lmList) > 21:
+        if((lmList[12+21][2] < lmList[8+21][2] and lmList[16+21][2] < lmList[8+21][2] and lmList[12+21][2] < lmList[8+21][2]) and lmList[0+21][2] < lmList[8+21][2] and lmList[8+21][2] > lmList[6+21][2] and lmList[8+21][2] > lmList[7+21][2] and lmList[4+21][2] < lmList[8+21][2]):
+            if((lmList[8+21][1] > lmList[20+21][1]) and (lmList[6+21][1] > lmList[4+21][1])):
+                action.append("pointing down")
+            if((lmList[8+21][1] < lmList[20+21][1]) and (lmList[6+21][1] < lmList[4+21][1])):
+                action.append("pointing down")
 
 def main():
     cap = cv.VideoCapture(0)
@@ -69,14 +94,14 @@ def main():
         action = []
         if len(lmList) != 0:
             # Gesto 1
-            if(pointing_up(lmList)):
-                action.append("pointing up")
+            pointing_up(lmList, action)
             # Gesto 2
-            if(pointing_down(lmList)):
-                action.append("pointing down")
+            pointing_down(lmList, action)    
 
         if len(action) != 0:
             cv.putText(frame, action[0], (100,170), cv.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
+            if len(action) > 1:
+                cv.putText(frame, action[1], (400,170), cv.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
             
         #FPS
         cTime = time.time()
