@@ -40,12 +40,28 @@ class handDetcetor():
                         cv.circle(frame, (cx, cy), 3, (255,0,255), cv.FILLED)
 
             return lmList
+    
+    def findPosition1(self, frame, handNo = 1, draw = True):
+            
+            lmList1 = []
+            if self.results.multi_hand_landmarks:
+                myHand = self.results.multi_hand_landmarks[handNo]
+                for id, lm in enumerate(myHand.landmark):
+                    #print(id, lm)
+                    h, w, c= frame.shape
+                    cx, cy= int(lm.x*w), int(lm.y*h)
+                    #print(id, cx, cy)
+                    lmList1.append([id, cx, cy])
+                    if draw :
+                        cv.circle(frame, (cx, cy), 3, (255,0,255), cv.FILLED)
 
-def pointing_up(lmList):
-    if((lmList[12][2] > lmList[8][2] and lmList[16][2] > lmList[8][2] and lmList[12][2] > lmList[8][2]) and lmList[0][2] > lmList[8][2] and lmList[8][2] < lmList[6][2] and lmList[8][2] < lmList[7][2]  and lmList[4][2] > lmList[8][2]):
-        if((lmList[8][1] > lmList[20][1]) and (lmList[6][1] > lmList[4][1])):
+            return lmList1
+
+def pointing_up(lmList1):
+    if((lmList1[12][2] > lmList1[8][2] and lmList1[16][2] > lmList1[8][2] and lmList1[12][2] > lmList1[8][2]) and lmList1[0][2] > lmList1[8][2] and lmList1[8][2] < lmList1[6][2] and lmList1[8][2] < lmList1[7][2]  and lmList1[4][2] > lmList1[8][2]):
+        if((lmList1[8][1] > lmList1[20][1]) and (lmList1[6][1] > lmList1[4][1])):
             return True
-        if((lmList[8][1] < lmList[20][1]) and (lmList[6][1] < lmList[4][1])):
+        if((lmList1[8][1] < lmList1[20][1]) and (lmList1[6][1] < lmList1[4][1])):
             return True
         
 def pointing_down(lmList):
